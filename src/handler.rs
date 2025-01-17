@@ -1,12 +1,11 @@
 use crate::{cache, models::GenericResponseObject};
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use deadpool_redis::Pool as RedisPool;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::Serialize;
 use tracing::{info, warn};
-use utoipa::{path, ToSchema};
 
 static VERSION_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"^v\d+(\.\d+)?$").unwrap_or_else(|_| Regex::new(r"^$").unwrap()));

@@ -1,4 +1,3 @@
-use crate::api_doc;
 use crate::{handler, validateintegritytoken};
 use actix_web::web;
 

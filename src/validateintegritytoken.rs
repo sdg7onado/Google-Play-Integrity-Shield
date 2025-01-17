@@ -10,7 +10,6 @@ use gcp_auth::{AuthenticationManager, Token};
 use reqwest::Client;
 use serde_json::json;
 use tracing::warn;
-use utoipa::{path, ToSchema};
 
 const SCOPE: &str = "https://www.googleapis.com/auth/playintegrity";
 const GOOGLE_PLAY_INTEGRITY_API_URL: &str = "https://playintegrity.googleapis.com/v1/";
