@@ -1,24 +1,71 @@
-use std::collections::HashMap;
-use std::env;
-use std::net::Ipv4Addr;
-use warp::{http::Response, Filter};
+mod api_doc;
+mod cache;
+mod config;
+mod db;
+mod handler;
+mod logger;
+mod middleware;
+mod models;
+mod routes;
+mod telemetry;
+mod validateintegritytoken;
+mod validation;
 
-#[tokio::main]
-async fn main() {
-    let example1 = warp::get()
-        .and(warp::path("api"))
-        .and(warp::path("HttpExample"))
-        .and(warp::query::<HashMap<String, String>>())
-        .map(|p: HashMap<String, String>| match p.get("name") {
-            Some(name) => Response::builder().body(format!("Hello, {}. This HTTP triggered function executed successfully.", name)),
-            None => Response::builder().body(String::from("This HTTP triggered function executed successfully. Pass a name in the query string for a personalized response.")),
-        });
+use crate::handler::print_message;
+use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer};
+use api_doc::ApiDoc;
+use config::Config;
+use tokio::signal;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
-    let port_key = "FUNCTIONS_CUSTOMHANDLER_PORT";
-    let port: u16 = match env::var(port_key) {
-        Ok(val) => val.parse().expect("Custom Handler port is not a number!"),
-        Err(_) => 3000,
-    };
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv::dotenv().ok();
 
-    warp::serve(example1).run((Ipv4Addr::LOCALHOST, port)).await
+    logger::init();
+
+    let config = Config::from_env().expect("Failed to load configuration");
+
+    telemetry::init(&config.app_insights_key);
+
+    let db_pool = db::init_pool(&config.database_url).await;
+    let redis_pool = cache::init_pool(&config.redis_url).await;
+
+    print_message(format!("Starting server on {}", config.server_addr)).await;
+
+    let server = HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(db_pool.clone()))
+            .app_data(web::Data::new(redis_pool.clone()))
+            .wrap(Logger::default())
+            .wrap(middleware::security_headers())
+            .configure(routes::configure_routes)
+            .route(
+                "/swagger-ui",
+                web::get().to(|| async { HttpResponse::Ok() }),
+            )
+            .service(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
+    })
+    .bind(config.server_addr)?
+    .run();
+
+    let server_handle = server.handle();
+
+    tokio::spawn(async move {
+        if let Err(e) = server.await {
+            eprintln!("Server error: {}", e);
+        }
+    });
+
+    print_message(format!("Started the Play Integrity API server!")).await;
+
+    signal::ctrl_c().await?;
+
+    print_message("Termination signal received. Shutting down gracefully...".to_string()).await;
+    print_message("Server is shutting down...".to_string()).await;
+
+    server_handle.stop(true).await;
+
+    Ok(())
 }

@@ -3,6 +3,36 @@ name = "handler"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-warp = "0.3"
-tokio = { version = "1", features = ["rt", "macros", "rt-multi-thread"] }
+
+[dependencies] 
+actix-cors = "0.6"                                                                  # CORS
+actix-rt = "2.8"                                                                    # Runtime for Actix                               
+actix-web = "4.0"                                                                   # Web framework
+appinsights = "0.2.3"                                                               # Update this to the latest version if needed
+chrono = "0.4"                                                                      # Time handling     
+deadpool-redis = "0.10"                                                             # Redis connection pool
+dotenv = "0.15"                                                                     # Environment variable loading
+gcp_auth = "0.10"                                                                   # GCP Auth
+once_cell = "1.17"
+redis = { version = "0.23", features = ["tokio-comp"] }
+regex = "1.8"                                                                       # Regex
+reqwest = { version = "0.11", features = ["json"] }                                 # HTTP client
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-native-tls"] }
+serde = { version = "1.0", features = ["derive"] }                                  # JSON serialization
+serde_json = "1.0"                                                                  # JSON handling
+tokio = { version = "1", features = ["full", "macros"] }
+tracing = "0.1"                                                                     # Structured logging
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1.2", features = ["v4"] }                                       # UUIDs
+utoipa = { version="5", features = ["actix_extras"]}
+utoipa-swagger-ui = {version="8", features=["actix-web"]}
+validator = "0.16"                                                                  # Input validation
+
+[profile.dev]
+debug = true
+
+[features]
+default = ["dev"]
+dev = []
+staging = []
+release = []
