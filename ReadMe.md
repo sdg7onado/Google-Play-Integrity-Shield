@@ -4,7 +4,7 @@
 Implement the **Google Play Integrity API** with a focus on the **Decode Integrity Token** operation using the Rust programming language.
 
 The application will be hosted on Azure as an Azure Function.
-See [`Azure Functions Custom Handlers`](https://learn.microsoft.com/en-us/azure/azure-functions/functions-custom-handlers)
+See [`Quickstart: Create a Go or Rust function in Azure using Visual Studio Code`](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-other)
 
 ## **Overview**
 The **Google Play Integrity API** allows app developers to detect harmful activity or untrustworthy devices interacting with their applications.  
