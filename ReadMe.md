@@ -1,4 +1,4 @@
-# Google Play Integrity Shield API
+# (Rust) Google Play Integrity Shield API
 
 ## **Objective**
 Implement the **Google Play Integrity API** with a focus on the **Decode Integrity Token** operation using the Rust programming language.
